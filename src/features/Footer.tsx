@@ -20,7 +20,7 @@ export default function Footer() {
 
           <div className="level-item">
             <a
-              href="https://github.com"
+              href="https://github.com/byronxu99/spam-script"
               target="_blank"
               rel="noopener noreferrer"
               className="has-text-grey-dark"
