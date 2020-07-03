@@ -1,3 +1,31 @@
+# Spam Script
+Bulk email sender/mail merge app using scripts.mit.edu
+
+## Links
+* **Live demo on Github Pages: https://byronxu99.github.io/spam-script/**
+* Old spam script: https://github.com/wnavarre/email-dictator
+
+## About
+### Frontend
+Made with Typescript and React.
+* CSV parsing with [PapaParse](https://www.papaparse.com/)
+* Templating with Javascript template literals (no fancy libraries here)
+* Markdown parsing with [Marked](https://github.com/markedjs/marked)
+* HTML sanitization with [DOMPurify](https://github.com/cure53/DOMPurify)
+* HTML to plain text conversion with [html-to-text](https://github.com/werk85/node-html-to-text)
+
+### Backend
+The backend (files in [public/backend/](https://github.com/byronxu99/spam-script/tree/master/public/backend)) consists of a few Python scripts running on [scripts.mit.edu](https://scripts.mit.edu/web/).
+
+* `sendmail.py` implementes a stateless JSON API. It takes in a JSON object describing an email message, generates the message, and attempts to send it.
+* `sendmail_raw.py` (not currently used) takes in a raw RFC 2822 formatted message and attempts to send it.
+
+These scripts send messages "as-is" without further modification. All of the actual templating and formatting take place on the frontend.
+
+### Deployment on scripts.mit.edu
+SSH into Athena and go to your `web_scripts/` directory. Clone this repository, `cd` into it, and run `git checkout gh-pages`.
+
+# Development
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app), using the [Redux](https://redux.js.org/) and [Redux Toolkit](https://redux-toolkit.js.org/) template.
 
 ## Available Scripts
@@ -26,6 +54,9 @@ The build is minified and the filenames include the hashes.<br />
 Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+
+### `npm run deploy`
+Deploys the build to the `gh-pages` branch.
 
 ### `npm run eject`
 
