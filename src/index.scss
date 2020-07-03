@@ -1,0 +1,90 @@
+@charset "utf-8";
+
+// ESP colors
+$green: rgb(136, 207, 0);
+$cyan: rgb(61, 192, 255);
+$purple: rgb(121, 50, 227);
+$red: rgb(212, 84, 55);
+$orange: rgb(255, 157, 0);
+$yellow: rgb(237, 182, 0);
+$blue: rgb(28, 106, 210);
+
+@import "~bulma/bulma";
+
+// add underline to text
+.is-underlined {
+  text-decoration: underline;
+  text-decoration-thickness: auto;
+  text-decoration-skip-ink: auto;
+}
+
+// for the big emoji icons on the main page
+.huge-icon {
+  font-size: 6rem;
+}
+
+// add a bit of space between <p> elements inside a container
+.add-paragraph-spacing > p {
+  margin-bottom: 0.25rem;
+}
+
+// for text wrapping and long word wrapping
+.wrap-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.break-overflow {
+  overflow-wrap: anywhere;
+}
+
+// fixed width table
+.fixed-table {
+  table-layout: fixed;
+}
+
+// full height stuff
+#root {
+  @include desktop {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+}
+.fill-height {
+  @include desktop {
+    flex: 1 1 auto;
+  }
+}
+.fullheight-container {
+  height: 100%;
+}
+.fullheight-card {
+  @include desktop {
+    height: inherit;
+    display: flex;
+    flex-direction: column;
+  }
+}
+.fullheight-column {
+  @include desktop {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+}
+.scrollable {
+  @include desktop {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+  }
+}
+.vertical-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
