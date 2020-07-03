@@ -1,0 +1,8 @@
+{
+    "from": "from@example.com",
+    "to": "to@example.com",
+    "cc": "cc@example.com",
+    "bcc": "bcc@example.com",
+    "subject": "Test Message 1",
+    "text": "plain text body"
+}

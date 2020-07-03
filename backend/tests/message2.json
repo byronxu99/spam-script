@@ -1,0 +1,9 @@
+{
+    "from": "from@example.com",
+    "to": "to@example.com",
+    "cc": ["cc1@example.com", "cc2@example.com"],
+    "bcc": "bcc1@example.com, bcc2@example.com, bcc3@example.com",
+    "subject": "Test Message 2 😀",
+    "text": "plain text body ✉ with unicode",
+    "html": "<strong>html</strong> body ✉ with unicode"
+}
