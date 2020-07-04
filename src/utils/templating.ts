@@ -4,6 +4,22 @@ import htmlToText from "html-to-text";
 import { ParsedData } from "../features/data/dataSlice";
 import { Message, MessageFormat, StandardHeaders } from "./messageTypes";
 
+// settings for libraries
+const MARKED_OPTIONS = {
+  smartLists: true,
+  smartypants: true,
+  xhtml: true,
+};
+
+const HTML_TO_TEXT_OPTIONS = {
+  hideLinkHrefIfSameAsText: true,
+  returnDomByDefault: false,
+  tables: true,
+};
+
+// reserved keywords that can't be used as header variable names
+export const RESERVED_KEYWORDS: string[] = ["ARGV"];
+
 // type definitions
 type SpamDataObject = {
   [key: string]: string | string[];
@@ -165,16 +181,3 @@ function postprocess(message: Message): Message {
   output.bodyFormat = MessageFormat.PROCESSED;
   return output;
 }
-
-// settings for libraries
-const MARKED_OPTIONS = {
-  smartLists: true,
-  smartypants: true,
-  xhtml: true,
-};
-
-const HTML_TO_TEXT_OPTIONS = {
-  hideLinkHrefIfSameAsText: true,
-  returnDomByDefault: false,
-  tables: true,
-};

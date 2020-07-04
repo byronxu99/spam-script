@@ -9,11 +9,11 @@ export type ParsedData = {
 };
 
 // what goes into the redux store
-interface DataState {
+type DataState = {
   raw?: string;
   headers?: string[];
   rows?: string[][];
-}
+};
 const initialState: DataState = {};
 
 // slice creation

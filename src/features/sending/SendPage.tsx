@@ -1,7 +1,4 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEnvelope } from "@fortawesome/free-regular-svg-icons";
-import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
 import { Message } from "../../utils/messageTypes";
 import { selectMessageTemplate } from "../message/messageSlice";
@@ -10,7 +7,7 @@ import {
   makeSpamObjectArray,
   makeMessageTemplater,
 } from "../../utils/templating";
-import MessagePreview from "../message/MessagePreview";
+import MessageSendCard from "./MessageSendCard";
 import NavBar from "../NavBar";
 
 type SendPageProps = {
@@ -88,34 +85,5 @@ export default function SendPage(props: SendPageProps) {
         </div>
       )}
     </>
-  );
-}
-
-function MessageSendCard(props: { message: Message }) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div className="card">
-      <div className="card-header">
-        <div className="card-header-title">
-          <span className="icon">
-            <FontAwesomeIcon icon={faEnvelope} fixedWidth />
-          </span>
-          &nbsp; To: {props.message.to || "(empty)"}
-        </div>
-
-        <div className="card-header-icon" onClick={() => setOpen(!open)}>
-          <span className="icon">
-            <FontAwesomeIcon icon={faAngleDown} fixedWidth />
-          </span>
-        </div>
-      </div>
-
-      {open && (
-        <div className="card-content">
-          <MessagePreview message={props.message} />
-        </div>
-      )}
-    </div>
   );
 }
