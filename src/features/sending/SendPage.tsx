@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { useSelector } from "react-redux";
-import { Message } from "../../utils/messageTypes";
-import { selectMessageTemplate } from "../message/messageSlice";
-import { selectParsedData } from "../data/dataSlice";
+import React, { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import {
-  makeSpamObjectArray,
-  makeMessageTemplater,
-} from "../../utils/templating";
+  SendStatus,
+  selectSendStatuses,
+  loadMessagesToSend,
+} from "./sendingSlice";
 import MessageSendCard from "./MessageSendCard";
 import NavBar from "../NavBar";
 
@@ -15,26 +13,23 @@ type SendPageProps = {
 };
 
 export default function SendPage(props: SendPageProps) {
-  // back button on navbar
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [canGoBack, setCanGoBack] = useState(true);
-
   // data from redux store
-  const template = useSelector(selectMessageTemplate);
-  const data = useSelector(selectParsedData);
+  const sendStatuses = useSelector(selectSendStatuses);
+  const dispatch = useDispatch();
 
-  // convert data into spam objects and templating function
-  const templater = useMemo(() => makeMessageTemplater(template), [template]);
-  const spams = useMemo(() => makeSpamObjectArray(data), [data]);
+  // update messages on component mount
+  useEffect(() => {
+    dispatch(loadMessagesToSend());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // list of processed messages
-  const [messages, setMessages] = useState([] as Message[]);
-  useEffect(() => setMessages(spams.map(templater)), [templater, spams]);
+  // when no messages have been sent, allow going back for further edits
+  const canGoBack = sendStatuses.every((x) => x === SendStatus.UNSENT);
 
   return (
     <>
       {/* no messages */}
-      {messages.length === 0 && (
+      {sendStatuses.length === 0 && (
         <div className="hero is-fullheight">
           <div className="hero-header">
             <NavBar
@@ -59,7 +54,7 @@ export default function SendPage(props: SendPageProps) {
       )}
 
       {/* with messages */}
-      {messages.length > 0 && (
+      {sendStatuses.length > 0 && (
         <div>
           <NavBar
             title="Send your spam"
@@ -69,7 +64,7 @@ export default function SendPage(props: SendPageProps) {
           />
 
           <div>
-            <div className="container px-3">
+            <div className="container px-3 pb-5">
               <div className="has-text-centered pb-5">
                 <h1 className="subtitle">
                   Message sending is not yet implemented, but you can preview
@@ -77,8 +72,9 @@ export default function SendPage(props: SendPageProps) {
                 </h1>
               </div>
 
-              {messages.map((message, index) => {
-                return <MessageSendCard key={index} message={message} />;
+              {/* generate a card for each array index */}
+              {sendStatuses.map((message, index) => {
+                return <MessageSendCard key={index} index={index} />;
               })}
             </div>
           </div>

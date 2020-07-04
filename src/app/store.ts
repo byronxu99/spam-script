@@ -1,11 +1,13 @@
 import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
 import dataReducer from "../features/data/dataSlice";
 import templateReducer from "../features/message/messageSlice";
+import sendingReducer from "../features/sending/sendingSlice";
 
 export const store = configureStore({
   reducer: {
     data: dataReducer, // the array of data
     template: templateReducer, // the message template
+    sending: sendingReducer, // per-message sending status
   },
 });
 

@@ -18,15 +18,18 @@ export default function App() {
   // which component to show
   const [uiState, setUiState] = useState(initialUiState);
 
-  // confirm page leave/refresh
-  const [beforeUnload, setBeforeUnload] = useState(false);
+  // are we running in a dev environment?
+  const isDevelopment =
+    process?.env?.NODE_ENV && process.env.NODE_ENV === "development";
+
+  // when going from main page to data page for the first time,
+  // add an event listener to confirm page leave/refresh
+  // https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload
+  const [beforeUnloadSet, setBeforeUnload] = useState(false);
   const setBeforeUnloadAndGotoDataPage = () => {
-    if (!beforeUnload) {
-      // https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload
+    if (!beforeUnloadSet && !isDevelopment) {
       window.addEventListener("beforeunload", function (e) {
-        // Cancel the event
-        e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
-        // Chrome requires returnValue to be set
+        e.preventDefault();
         e.returnValue = "";
       });
       setBeforeUnload(true);
@@ -34,9 +37,11 @@ export default function App() {
     setUiState(UiState.DATA_PAGE);
   };
 
+  // return the desired component
   switch (uiState) {
     case UiState.MAIN_PAGE:
       return <MainPage nextPage={setBeforeUnloadAndGotoDataPage} />;
+
     case UiState.DATA_PAGE:
       return (
         <DataPage
@@ -44,6 +49,7 @@ export default function App() {
           nextPage={() => setUiState(UiState.MESSAGE_PAGE)}
         />
       );
+
     case UiState.MESSAGE_PAGE:
       return (
         <MessagePage
@@ -51,8 +57,10 @@ export default function App() {
           nextPage={() => setUiState(UiState.SEND_PAGE)}
         />
       );
+
     case UiState.SEND_PAGE:
       return <SendPage prevPage={() => setUiState(UiState.MESSAGE_PAGE)} />;
+
     default:
       return <MainPage nextPage={setBeforeUnloadAndGotoDataPage} />;
   }

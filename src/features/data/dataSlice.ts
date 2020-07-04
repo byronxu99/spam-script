@@ -16,7 +16,7 @@ type DataState = {
 };
 const initialState: DataState = {};
 
-// slice creation
+// create the slice
 export const dataSlice = createSlice({
   name: "data",
   initialState,
@@ -30,9 +30,9 @@ export const dataSlice = createSlice({
     },
   },
 });
+export default dataSlice.reducer;
 
 const { setRawData, setParsedData } = dataSlice.actions;
-export default dataSlice.reducer;
 
 // exported actions
 export function loadData(input: string): AppThunk {

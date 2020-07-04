@@ -12,6 +12,7 @@ const initialState: Message = {
   attachments: [],
 };
 
+// create the slice
 export const messageSlice = createSlice({
   name: "template",
   initialState,
@@ -33,9 +34,10 @@ export const messageSlice = createSlice({
     },
   },
 });
-
-export const { setMessageFormat, setRawBody, setHeader } = messageSlice.actions;
 export default messageSlice.reducer;
+
+// exported actions
+export const { setMessageFormat, setRawBody, setHeader } = messageSlice.actions;
 
 // selectors
 export function selectMessageTemplate(state: RootState) {
