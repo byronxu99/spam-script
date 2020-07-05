@@ -20,6 +20,7 @@ type MessageSendObject = {
   message: Message;
   status: SendStatus;
   showPreview: boolean;
+  error?: Error;
 };
 
 // what goes into the redux store
@@ -40,6 +41,7 @@ export const sendingSlice = createSlice({
       state.length = 0;
       state.push(...action.payload);
     },
+
     setMessage: (
       state: SendingState,
       action: PayloadAction<{ index: number; message: Message }>
@@ -48,6 +50,7 @@ export const sendingSlice = createSlice({
         state[action.payload.index].message = action.payload.message;
       }
     },
+
     setStatus: (
       state: SendingState,
       action: PayloadAction<{ index: number; status: SendStatus }>
@@ -56,6 +59,17 @@ export const sendingSlice = createSlice({
         state[action.payload.index].status = action.payload.status;
       }
     },
+
+    setError: (
+      state: SendingState,
+      action: PayloadAction<{ index: number; error: Error }>
+    ) => {
+      if (state[action.payload.index]) {
+        state[action.payload.index].status = SendStatus.ERROR;
+        state[action.payload.index].error = action.payload.error;
+      }
+    },
+
     setShowPreview: (
       state: SendingState,
       action: PayloadAction<{ index?: number; showPreview: boolean }>
@@ -70,6 +84,47 @@ export const sendingSlice = createSlice({
         }
       }
     },
+
+    // mark a single message as sending,
+    // where the message index is given by action.payload
+    sendOneMessage: (state: SendingState, action: PayloadAction<number>) => {
+      // set state to sending
+      if (state[action.payload]) {
+        state[action.payload].status = SendStatus.SENDING;
+      }
+
+      // actual sending is done in sendingEpic
+    },
+
+    // mark all sendable messages as queued
+    sendAllMessages: (state: SendingState) => {
+      // find indices of all sendable messages
+      const sendIndices = state
+        .map((x) => x.status)
+        .map((status, index) => (shouldSendMessage(status) ? index : -1))
+        .filter((index) => index !== -1);
+
+      // set state to queued
+      sendIndices.forEach((index) => (state[index].status = SendStatus.QUEUED));
+
+      // actual sending is done in sendingEpic
+    },
+
+    // cancel the message sending process
+    cancelSending: (state: SendingState) => {
+      // find indices of all messages awaiting sending
+      const queuedIndices = state
+        .map((x) => x.status)
+        .map((status, index) => (status === SendStatus.QUEUED ? index : -1))
+        .filter((index) => index !== -1);
+
+      // set state to unsent
+      queuedIndices.forEach(
+        (index) => (state[index].status = SendStatus.UNSENT)
+      );
+
+      // sendingEpic will cancel ongoing processes
+    },
   },
 });
 export default sendingSlice.reducer;
@@ -79,9 +134,14 @@ export const {
   setSendingState,
   setMessage,
   setStatus,
+  setError,
   setShowPreview,
+  sendOneMessage,
+  sendAllMessages,
+  cancelSending,
 } = sendingSlice.actions;
 
+// create MessageSendObject array from data in redux store
 export function loadMessagesToSend(): AppThunk {
   return (dispatch, getState) => {
     // get data from redux store
@@ -117,4 +177,15 @@ export function selectSendObject(index: number) {
   return function (state: RootState): MessageSendObject {
     return state.sending[index];
   };
+}
+
+export function selectMessage(index: number) {
+  return function (state: RootState): Message {
+    return state.sending[index].message;
+  };
+}
+
+// test if a message should be sent
+export function shouldSendMessage(status: SendStatus) {
+  return status === SendStatus.UNSENT || status === SendStatus.ERROR;
 }
