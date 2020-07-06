@@ -45,12 +45,12 @@ export default function SendPage(props: SendPageProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // when done, clear the page leaving notification
+  // when done, clear the page exit notification
   useEffect(() => {
-    if (isDoneSending) {
+    if (numMessages > 0 && isDoneSending) {
       clearExitConfirmation();
     }
-  }, [isDoneSending]);
+  }, [numMessages, isDoneSending]);
 
   return (
     <>

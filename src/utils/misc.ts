@@ -7,21 +7,22 @@ export const isDevelopment: boolean =
 
 // confirm exiting of the page
 // https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload
+function preventExit(e: Event) {
+  e.preventDefault();
+  e.returnValue = false;
+}
 let isExitConfirmationSet: boolean = false;
+
 export function setExitConfirmation() {
   if (!isExitConfirmationSet && !isDevelopment) {
-    window.addEventListener("beforeunload", function (e) {
-      e.preventDefault();
-      e.returnValue = "";
-    });
+    window.addEventListener("beforeunload", preventExit);
     isExitConfirmationSet = true;
   }
 }
+
 export function clearExitConfirmation() {
   if (isExitConfirmationSet) {
-    window.addEventListener("beforeunload", function (e) {
-      delete e["returnValue"];
-    });
+    window.removeEventListener("beforeunload", preventExit);
     isExitConfirmationSet = false;
   }
 }
