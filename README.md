@@ -13,6 +13,7 @@ Made with Typescript and React.
 * Markdown parsing with [Marked](https://github.com/markedjs/marked)
 * HTML sanitization with [DOMPurify](https://github.com/cure53/DOMPurify)
 * HTML to plain text conversion with [html-to-text](https://github.com/werk85/node-html-to-text)
+* Async email sending with [RxJS](https://github.com/ReactiveX/rxjs) and [redux-observable](https://github.com/redux-observable/redux-observable)
 
 ### Backend
 The backend (files in [public/backend/](https://github.com/byronxu99/spam-script/tree/master/public/backend)) consists of a few Python scripts running on [scripts.mit.edu](https://scripts.mit.edu/web/).
