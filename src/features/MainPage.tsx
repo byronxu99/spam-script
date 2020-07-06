@@ -1,14 +1,12 @@
 import React from "react";
 import Footer from "./Footer";
+import { isMIT } from "../utils/misc";
 
 type MainPageProps = {
   nextPage: () => void;
 };
 
 export default function MainPage(props: MainPageProps) {
-  // whether we are viewing on scripts.mit.edu or 3rd party server
-  const isMIT = window.location.hostname.includes("mit.edu");
-
   return (
     <>
       <section className="hero is-fullheight">
@@ -42,8 +40,8 @@ export default function MainPage(props: MainPageProps) {
                 </div>
                 <p className="title is-3 py-1">Write your message</p>
                 <p className="subtitle is-5 py-2 px-5">
-                  Draft a Markdown, HTML, or plain-text email template. Now with
-                  live preview!
+                  Draft a Markdown, HTML, or plain-text email template,
+                  featuring instant preview
                 </p>
               </div>
 
@@ -55,7 +53,8 @@ export default function MainPage(props: MainPageProps) {
                 </div>
                 <p className="title is-3 py-1">Send your spam</p>
                 <p className="subtitle is-5 py-2 px-5">
-                  Not yet implemented :(
+                  Double-check all your messages and go! View live progress as
+                  each message sends.
                 </p>
               </div>
             </div>

@@ -2,7 +2,12 @@ import React from "react";
 import { Message } from "../../utils/messageTypes";
 
 // renders an in-browser preview of an email message
-export default function MessagePreview(props: { message: Message }) {
+// the additionalErrors property allows further errors to be displayed
+// (e.g. those encountered while trying to send the message)
+export default function MessagePreview(props: {
+  message: Message;
+  additionalErrors?: Error[];
+}) {
   const headerStyle = "has-text-weight-bold";
   const emptyStyle = "has-text-grey-light";
   const mandatory = {
@@ -13,6 +18,11 @@ export default function MessagePreview(props: { message: Message }) {
     subject: props.message.subject || "(empty)",
     subjectClass: props.message.subject ? "" : emptyStyle,
   };
+
+  // array of all errors (empty array if no errors)
+  const errors = (props.message.errors || []).concat(
+    props.additionalErrors || []
+  );
 
   return (
     <div>
@@ -108,9 +118,9 @@ export default function MessagePreview(props: { message: Message }) {
       </div>
 
       {/* errors */}
-      {props.message.errors && props.message.errors.length > 0 && (
+      {errors.length > 0 && (
         <div className="pt-5">
-          {props.message.errors.map((error, index) => {
+          {errors.map((error, index) => {
             return (
               <div key={index} className="message is-danger">
                 <div className="message-body">

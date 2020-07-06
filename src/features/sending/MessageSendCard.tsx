@@ -13,7 +13,7 @@ import MessagePreview from "../message/MessagePreview";
 
 export default function MessageSendCard(props: { index: number }) {
   // get data from redux store
-  const { message, status, showPreview } = useSelector(
+  const { message, status, showPreview, error } = useSelector(
     selectSendObject(props.index)
   );
   const dispatch = useDispatch();
@@ -36,6 +36,7 @@ export default function MessageSendCard(props: { index: number }) {
   // icon
   const icon = getIcon(status);
   const iconStyle = getIconStyle(status);
+  const iconTooltip = getIconTooltip(status);
   const iconSpin =
     status === SendStatus.QUEUED || status === SendStatus.SENDING;
 
@@ -44,7 +45,7 @@ export default function MessageSendCard(props: { index: number }) {
       <div className="card-header">
         <div className="card-header-title">
           {/* icon */}
-          <span className={`icon mr-3 ${iconStyle}`}>
+          <span className={`icon mr-3 ${iconStyle}`} title={iconTooltip}>
             <FontAwesomeIcon icon={icon} fixedWidth pulse={iconSpin} />
           </span>
           {/* recipients */}
@@ -79,7 +80,10 @@ export default function MessageSendCard(props: { index: number }) {
       {/* show message preview when expanded */}
       {showPreview && (
         <div className="card-content">
-          <MessagePreview message={message} />
+          <MessagePreview
+            message={message}
+            additionalErrors={error ? [error] : []}
+          />
         </div>
       )}
     </div>
@@ -111,5 +115,20 @@ function getIconStyle(status: SendStatus) {
       return "has-text-info";
     default:
       return "";
+  }
+}
+
+function getIconTooltip(status: SendStatus) {
+  switch (status) {
+    case SendStatus.UNSENT:
+      return "Not yet sent";
+    case SendStatus.QUEUED:
+      return "Queued for sending";
+    case SendStatus.SENDING:
+      return "Sending in progress";
+    case SendStatus.SUCCESS:
+      return "Delivered";
+    case SendStatus.ERROR:
+      return "Error";
   }
 }

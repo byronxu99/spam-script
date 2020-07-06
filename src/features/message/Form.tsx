@@ -43,7 +43,7 @@ export default function Form() {
               dispatch(setHeader({ header: "from", value: e.target.value }))
             }
           />
-          <p className="help">Must be an @mit.edu address</p>
+          <p className="help">Should be an @mit.edu address</p>
         </div>
       </div>
 

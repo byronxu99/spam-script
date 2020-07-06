@@ -24,6 +24,7 @@ import {
   cancelSending,
 } from "./sendingSlice";
 import { Message } from "../../utils/messageTypes";
+import { isMIT } from "../../utils/misc";
 
 // response from the message sending API on scripts.mit.edu
 type ApiResponse = {
@@ -34,9 +35,6 @@ type ApiResponse = {
 
 // API call for sending a single message
 function apiSendMessage(message: Message): Observable<ApiResponse> {
-  // whether we are viewing on scripts.mit.edu or 3rd party server
-  const isMIT = window.location.hostname.includes("mit.edu");
-
   if (isMIT) {
     return apiSendMessageReal(message);
   } else {
@@ -69,7 +67,9 @@ function apiSendMessageFake(message: Message): Observable<ApiResponse> {
 
   const response = {
     status: isError ? "error" : "success",
-    message: isError ? "This is a fake error" : "",
+    message: isError
+      ? "This is a fake error that occurs with 50% probability"
+      : "",
   };
 
   return of(response).pipe(delay(delayTime));

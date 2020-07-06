@@ -3,6 +3,7 @@ import MainPage from "./features/MainPage";
 import DataPage from "./features/data/DataPage";
 import MessagePage from "./features/message/MessagePage";
 import SendPage from "./features/sending/SendPage";
+import { isDevelopment } from "./utils/misc";
 
 enum UiState {
   MAIN_PAGE,
@@ -17,10 +18,6 @@ const initialUiState: UiState = UiState.MAIN_PAGE;
 export default function App() {
   // which component to show
   const [uiState, setUiState] = useState(initialUiState);
-
-  // are we running in a dev environment?
-  const isDevelopment =
-    process?.env?.NODE_ENV && process.env.NODE_ENV === "development";
 
   // when going from main page to data page for the first time,
   // add an event listener to confirm page leave/refresh
