@@ -1,14 +1,18 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import {
   SendStatus,
   selectSendStatuses,
   loadMessagesToSend,
   setShowPreview,
+  sendMessages,
+  cancelSending,
 } from "./sendingSlice";
 import MessageSendCard from "./MessageSendCard";
 import NavBar from "../NavBar";
-import { isMIT } from "../../utils/misc";
+import { isMIT, clearExitConfirmation } from "../../utils/misc";
 
 type SendPageProps = {
   prevPage: () => void;
@@ -19,19 +23,39 @@ export default function SendPage(props: SendPageProps) {
   const sendStatuses = useSelector(selectSendStatuses);
   const dispatch = useDispatch();
 
+  // counts of various message types
+  const numMessages = sendStatuses.length;
+  const numSuccess = sendStatuses.filter((x) => x === SendStatus.SUCCESS)
+    .length;
+  const numUnsent = numMessages - numSuccess;
+  const numError = sendStatuses.filter((x) => x === SendStatus.ERROR).length;
+
+  // when no messages have been sent, allow going back for further edits
+  const canGoBack = sendStatuses.every((x) => x === SendStatus.UNSENT);
+  // done sending when all messages are successfully sent
+  const isDoneSending = numSuccess === numMessages;
+  // in progress if any message is queued or sending
+  const isInProgress = sendStatuses.some(
+    (x) => x === SendStatus.QUEUED || x === SendStatus.SENDING
+  );
+
   // update messages on component mount
   useEffect(() => {
     dispatch(loadMessagesToSend());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // when no messages have been sent, allow going back for further edits
-  const canGoBack = sendStatuses.every((x) => x === SendStatus.UNSENT);
+  // when done, clear the page leaving notification
+  useEffect(() => {
+    if (isDoneSending) {
+      clearExitConfirmation();
+    }
+  }, [isDoneSending]);
 
   return (
     <>
       {/* no messages */}
-      {sendStatuses.length === 0 && (
+      {numMessages === 0 && (
         <div className="hero is-fullheight">
           <div className="hero-header">
             <NavBar
@@ -56,7 +80,7 @@ export default function SendPage(props: SendPageProps) {
       )}
 
       {/* with messages */}
-      {sendStatuses.length > 0 && (
+      {numMessages > 0 && (
         <div>
           <NavBar
             title="Send your spam"
@@ -78,17 +102,78 @@ export default function SendPage(props: SendPageProps) {
                 </div>
               )}
 
-              <div className="has-text-centered pb-5">
-                <h1 className="subtitle">
-                  Message sending is not yet implemented, but you can preview
-                  your emails here.
-                </h1>
+              {/* progress stats and send/pause button */}
+              <div className="level pb-2">
+                {/* count of messages not yet successfully sent */}
+                <div className="level-item has-text-centered">
+                  <div>
+                    <p className="title is-1">{numUnsent}</p>
+                    <p className="heading">Not sent</p>
+                  </div>
+                </div>
+                {/* count of messages successfully sent */}
+                <div className="level-item has-text-centered">
+                  <div>
+                    <p className="title is-1">{numSuccess}</p>
+                    <p className="heading">Delivered</p>
+                  </div>
+                </div>
+                {/* number of errors that occurred while sending */}
+                <div className="level-item has-text-centered">
+                  <div>
+                    <p
+                      className={`title is-1 ${
+                        numError > 0 ? "has-text-danger" : ""
+                      }`}
+                    >
+                      {numError}
+                    </p>
+                    <p className="heading">Errors</p>
+                  </div>
+                </div>
+                {/* button to send/pause */}
+                <div className="level-item has-text-centered">
+                  {isDoneSending && (
+                    <div>
+                      <span className="icon is-large has-text-success">
+                        <FontAwesomeIcon icon={faCheck} size="3x" />
+                      </span>
+                      <p className="heading pt-1">All done!</p>
+                    </div>
+                  )}
+                  {isInProgress && (
+                    <div>
+                      <button
+                        className="button is-medium is-outlined is-warning"
+                        onClick={() => dispatch(cancelSending())}
+                      >
+                        Pause
+                      </button>
+                      <p className="heading pt-1">Click to pause</p>
+                    </div>
+                  )}
+                  {!isDoneSending && !isInProgress && (
+                    <div>
+                      <button
+                        className="button is-medium is-success"
+                        onClick={() => dispatch(sendMessages())}
+                      >
+                        Spam!
+                      </button>
+                      <p className="heading pt-1">
+                        {numError > 0 ? "Click to (re)send" : "Click to send"}
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* label and buttons for expanding/collapsing cards */}
               <div className="level is-mobile mb-2">
                 <div className="level-left">
-                  <p className="label mt-2">Messages</p>
+                  <p className="subtitle is-5 mt-1">{`You have ${numMessages} email message${
+                    numMessages > 1 ? "s" : ""
+                  }.`}</p>
                 </div>
                 <div className="level-right">
                   <div className="buttons has-addons">

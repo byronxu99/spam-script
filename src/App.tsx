@@ -3,7 +3,7 @@ import MainPage from "./features/MainPage";
 import DataPage from "./features/data/DataPage";
 import MessagePage from "./features/message/MessagePage";
 import SendPage from "./features/sending/SendPage";
-import { isDevelopment } from "./utils/misc";
+import { setExitConfirmation } from "./utils/misc";
 
 enum UiState {
   MAIN_PAGE,
@@ -19,25 +19,18 @@ export default function App() {
   // which component to show
   const [uiState, setUiState] = useState(initialUiState);
 
-  // when going from main page to data page for the first time,
-  // add an event listener to confirm page leave/refresh
-  // https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload
-  const [beforeUnloadSet, setBeforeUnload] = useState(false);
-  const setBeforeUnloadAndGotoDataPage = () => {
-    if (!beforeUnloadSet && !isDevelopment) {
-      window.addEventListener("beforeunload", function (e) {
-        e.preventDefault();
-        e.returnValue = "";
-      });
-      setBeforeUnload(true);
-    }
-    setUiState(UiState.DATA_PAGE);
-  };
-
   // return the desired component
   switch (uiState) {
     case UiState.MAIN_PAGE:
-      return <MainPage nextPage={setBeforeUnloadAndGotoDataPage} />;
+      return (
+        <MainPage
+          nextPage={() => {
+            // add the "are you sure you want to leave" notification
+            setExitConfirmation();
+            setUiState(UiState.DATA_PAGE);
+          }}
+        />
+      );
 
     case UiState.DATA_PAGE:
       return (
@@ -57,8 +50,5 @@ export default function App() {
 
     case UiState.SEND_PAGE:
       return <SendPage prevPage={() => setUiState(UiState.MESSAGE_PAGE)} />;
-
-    default:
-      return <MainPage nextPage={setBeforeUnloadAndGotoDataPage} />;
   }
 }

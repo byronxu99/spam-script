@@ -38,7 +38,7 @@ export default function NavBar(props: NavBarProps = defaultProps) {
               <span className="icon">
                 <FontAwesomeIcon icon={faAngleLeft} transform="down-1" />
               </span>
-              &nbsp;Back
+              <span>Back</span>
             </button>
           </div>
 
@@ -55,7 +55,7 @@ export default function NavBar(props: NavBarProps = defaultProps) {
                 "button is-success " + (props.showNext ? "" : "is-invisible")
               }
             >
-              Next&nbsp;
+              <span>Next</span>
               <span className="icon">
                 <FontAwesomeIcon icon={faAngleRight} transform="down-1" />
               </span>

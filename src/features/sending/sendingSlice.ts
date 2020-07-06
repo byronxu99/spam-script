@@ -16,11 +16,16 @@ export enum SendStatus {
   ERROR,
 }
 
-type MessageSendObject = {
+export type MessageSendObject = {
   message: Message;
   status: SendStatus;
   showPreview: boolean;
-  error?: Error;
+  error?: SendError;
+};
+
+export type SendError = {
+  name: string;
+  message: string;
 };
 
 // what goes into the redux store
@@ -57,12 +62,16 @@ export const sendingSlice = createSlice({
     ) => {
       if (state[action.payload.index]) {
         state[action.payload.index].status = action.payload.status;
+        // if status is success, clear any errors
+        if (action.payload.status === SendStatus.SUCCESS) {
+          state[action.payload.index].error = undefined;
+        }
       }
     },
 
     setError: (
       state: SendingState,
-      action: PayloadAction<{ index: number; error: Error }>
+      action: PayloadAction<{ index: number; error: SendError }>
     ) => {
       if (state[action.payload.index]) {
         state[action.payload.index].status = SendStatus.ERROR;
@@ -85,19 +94,7 @@ export const sendingSlice = createSlice({
       }
     },
 
-    // mark a single message as sending,
-    // where the message index is given by action.payload
-    sendOneMessage: (state: SendingState, action: PayloadAction<number>) => {
-      // set state to sending
-      if (state[action.payload]) {
-        state[action.payload].status = SendStatus.SENDING;
-      }
-
-      // actual sending is done in sendingEpic
-    },
-
-    // mark all sendable messages as queued
-    sendAllMessages: (state: SendingState) => {
+    sendMessages: (state: SendingState) => {
       // find indices of all sendable messages
       const sendIndices = state
         .map((x) => x.status)
@@ -110,12 +107,15 @@ export const sendingSlice = createSlice({
       // actual sending is done in sendingEpic
     },
 
-    // cancel the message sending process
     cancelSending: (state: SendingState) => {
       // find indices of all messages awaiting sending
       const queuedIndices = state
         .map((x) => x.status)
-        .map((status, index) => (status === SendStatus.QUEUED ? index : -1))
+        .map((status, index) =>
+          status === SendStatus.QUEUED || status === SendStatus.SENDING
+            ? index
+            : -1
+        )
         .filter((index) => index !== -1);
 
       // set state to unsent
@@ -136,8 +136,7 @@ export const {
   setStatus,
   setError,
   setShowPreview,
-  sendOneMessage,
-  sendAllMessages,
+  sendMessages,
   cancelSending,
 } = sendingSlice.actions;
 

@@ -1,26 +1,24 @@
-import { Epic, combineEpics } from "redux-observable";
-import { Observable, of, from } from "rxjs";
+import { Epic } from "redux-observable";
+import { Observable, of, from, concat } from "rxjs";
 import { ajax } from "rxjs/ajax";
-//import { ajax, AjaxRequest, AjaxResponse } from "rxjs/ajax";
 import {
   map,
   filter,
   withLatestFrom,
   concatMap,
-  race,
-  take,
+  takeUntil,
   delay,
+  tap,
   catchError,
 } from "rxjs/operators";
 import {
   SendStatus,
+  SendError,
   selectSendStatuses,
   selectMessage,
-  shouldSendMessage,
   setStatus,
   setError,
-  sendOneMessage,
-  sendAllMessages,
+  sendMessages,
   cancelSending,
 } from "./sendingSlice";
 import { Message } from "../../utils/messageTypes";
@@ -55,24 +53,40 @@ function apiSendMessageReal(message: Message): Observable<ApiResponse> {
   }).pipe(
     // extract the response object inside the AjaxResponse
     map((ajaxResponse) => {
+      if (!ajaxResponse.response.status) {
+        return {
+          status: "error",
+          message: `Did not receive valid response from API (server responded with status: ${ajaxResponse.response.status})`,
+        };
+      }
       return ajaxResponse.response as ApiResponse;
     })
   );
 }
 
-// fake API call for sending a single message
+// simulated API call for sending a single message
 function apiSendMessageFake(message: Message): Observable<ApiResponse> {
   const isError = Math.random() < 0.5;
-  const delayTime = 2000;
+  const delayTime = 1000;
+  const recipients: string = [message.to, message.cc, message.bcc]
+    .filter((x) => x?.trim())
+    .join(", ");
 
-  const response = {
+  return of({
     status: isError ? "error" : "success",
     message: isError
       ? "This is a fake error that occurs with 50% probability"
       : "",
-  };
-
-  return of(response).pipe(delay(delayTime));
+  }).pipe(
+    delay(delayTime),
+    tap(() => {
+      if (isError) {
+        console.log(`Fake API: encountered a fake error`);
+      } else {
+        console.log(`Fake API: sent message to ${recipients}`);
+      }
+    })
+  );
 }
 
 // convert the API response to the appropriate action
@@ -85,11 +99,12 @@ function apiHandleResponse(index: number, response: ApiResponse) {
     });
   } else {
     // server encountered an error while sending the message
-    const error = Error(response.message);
-    error.name = "ServerError";
     return setError({
       index: index,
-      error: error,
+      error: {
+        name: "ServerError",
+        message: response.message || "",
+      } as SendError,
     });
   }
 }
@@ -102,79 +117,68 @@ send all messages
     set status to queued
   rxjs epic:
     create indices of messages to be sent
-    emit stream of send one actions
-
-send one message
-  redux reducer:
-    set status to sending
-  rxjs epic:
-    do ajax request
-      on success: emit setStatus to success action
-      on error: emit setError action
+    map over message indices
+      set status to sending
+      do the API call to send messsage
 
 cancel
   redux reducer:
-    filter queued messages
+    filter queued/sending messages
     set status to unsent
+  rxjs epic:
+    stop the stream
 */
 
-// redux-observable rxjs epic for sending one message
-const sendOneMessageEpic: Epic = (action$, state$) =>
+export const sendingEpic: Epic = (action$, state$) =>
   action$.pipe(
-    filter(sendOneMessage.match),
+    filter(sendMessages.match),
+
+    // loop over each sendMessages action
     withLatestFrom(state$),
     concatMap(([action, state]) =>
-      race(
-        // select the message where index = action.payload
-        // then send the message
-        apiSendMessage(selectMessage(action.payload)(state)).pipe(
-          map((response) =>
-            // convert the api response into the desired action
-            apiHandleResponse(action.payload, response)
-          ),
-          // if there's an ajax error
-          catchError((error) =>
-            // emit an observable containing the error handling action
+      // create observable of message indices to be sent
+      from(
+        // create array of message indices to be sent
+        selectSendStatuses(state)
+          .map((status, index) => (status === SendStatus.QUEUED ? index : -1))
+          .filter((index) => index !== -1)
+      ).pipe(
+        // send the message
+        withLatestFrom(state$),
+        concatMap(([index, state]) =>
+          concat(
+            // notify that the message is sending
             of(
-              setError({
-                index: action.payload,
-                error: error,
+              setStatus({
+                index: index,
+                status: SendStatus.SENDING,
               })
+            ),
+
+            // do the api call
+            apiSendMessage(selectMessage(index)(state)).pipe(
+              // convert the api response into the desired response action
+              map((response) => apiHandleResponse(index, response)),
+
+              // if there's an ajax error,
+              // emit an observable containing the error handling action
+              catchError((error: Error) =>
+                of(
+                  setError({
+                    index: index,
+                    error: {
+                      name: error.name,
+                      message: error.message,
+                    } as SendError,
+                  })
+                )
+              )
             )
           )
         ),
 
         // quit upon receiving a cancellation action
-        action$.pipe(filter(cancelSending.match), take(1))
+        takeUntil(action$.pipe(filter(cancelSending.match)))
       )
     )
   );
-
-// redux-observable rxjs epic for sending all messages
-const sendAllMessagesEpic: Epic = (action$, state$) =>
-  action$.pipe(
-    filter(sendAllMessages.match),
-    withLatestFrom(state$),
-    concatMap(([action, state]) =>
-      race(
-        // create observable of message indices to be sent
-        from(
-          // create array of message indices to be sent
-          selectSendStatuses(state)
-            .map((status, index) => (shouldSendMessage(status) ? index : -1))
-            .filter((index) => index !== -1)
-        ).pipe(
-          // convert each index to an action
-          map((index) => sendOneMessage(index))
-        ),
-
-        // quit upon receiving a cancellation action
-        action$.pipe(filter(cancelSending.match), take(1))
-      )
-    )
-  );
-
-export const sendingEpic = combineEpics(
-  sendOneMessageEpic,
-  sendAllMessagesEpic
-);

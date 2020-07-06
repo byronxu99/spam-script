@@ -72,7 +72,7 @@ export default function MessagePage(props: MessagePageProps) {
                           <span className="icon">
                             <FontAwesomeIcon icon={faEnvelope} fixedWidth />
                           </span>
-                          Preview
+                          <span>Preview</span>
                         </a>
                       </li>
                       <li
@@ -90,7 +90,7 @@ export default function MessagePage(props: MessagePageProps) {
                               fixedWidth
                             />
                           </span>
-                          Help
+                          <span>Help</span>
                         </a>
                       </li>
                       <li
@@ -111,7 +111,7 @@ export default function MessagePage(props: MessagePageProps) {
                               fixedWidth
                             />
                           </span>
-                          Attachments
+                          <span>Attachments</span>
                         </a>
                       </li>
                     </ul>
