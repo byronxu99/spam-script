@@ -3,6 +3,9 @@ Bulk email sender/mail merge app using scripts.mit.edu
 
 ## Links
 * **Live demo on Github Pages: https://byronxu99.github.io/spam-script/**
+  * Demo only. It doesn't actually send emails.
+* Use it for real: https://esp.scripts.mit.edu:444/spam-script/
+  * MIT certificate authentication required
 * Old spam script: https://github.com/wnavarre/email-dictator
 
 ## About
