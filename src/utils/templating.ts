@@ -13,7 +13,6 @@ const MARKED_OPTIONS = {
 
 const HTML_TO_TEXT_OPTIONS = {
   hideLinkHrefIfSameAsText: true,
-  returnDomByDefault: false,
   tables: true,
 };
 
