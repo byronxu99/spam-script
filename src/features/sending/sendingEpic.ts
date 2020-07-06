@@ -56,7 +56,7 @@ function apiSendMessageReal(message: Message): Observable<ApiResponse> {
       if (!ajaxResponse.response.status) {
         return {
           status: "error",
-          message: `Did not receive valid response from API (server responded with status: ${ajaxResponse.response.status})`,
+          message: "Did not receive valid response from API",
         };
       }
       return ajaxResponse.response as ApiResponse;
@@ -103,7 +103,9 @@ function apiHandleResponse(index: number, response: ApiResponse) {
       index: index,
       error: {
         name: "ServerError",
-        message: response.message || "",
+        message: response.message
+          ? `${response.status}: ${response.message}`
+          : response.status,
       } as SendError,
     });
   }
@@ -111,7 +113,7 @@ function apiHandleResponse(index: number, response: ApiResponse) {
 
 /*
 DOCUMENTATION FOR MESSAGE SENDING ACTIONS
-send all messages
+sendMessages action:
   redux reducer:
     filter unsent/error messages
     set status to queued
@@ -121,7 +123,7 @@ send all messages
       set status to sending
       do the API call to send messsage
 
-cancel
+cancelSending action:
   redux reducer:
     filter queued/sending messages
     set status to unsent
