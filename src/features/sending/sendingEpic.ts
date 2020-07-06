@@ -1,6 +1,7 @@
 import { Epic, combineEpics } from "redux-observable";
 import { Observable, of, from } from "rxjs";
-import { ajax, AjaxRequest, AjaxResponse } from "rxjs/ajax";
+import { ajax } from "rxjs/ajax";
+//import { ajax, AjaxRequest, AjaxResponse } from "rxjs/ajax";
 import {
   map,
   filter,
@@ -24,8 +25,15 @@ import {
 } from "./sendingSlice";
 import { Message } from "../../utils/messageTypes";
 
+// response from the message sending API on scripts.mit.edu
+type ApiResponse = {
+  status: string;
+  message?: string;
+  command?: string;
+};
+
 // API call for sending a single message
-function apiSendMessage(message: Message): Observable<AjaxResponse> {
+function apiSendMessage(message: Message): Observable<ApiResponse> {
   // whether we are viewing on scripts.mit.edu or 3rd party server
   const isMIT = window.location.hostname.includes("mit.edu");
 
@@ -37,7 +45,7 @@ function apiSendMessage(message: Message): Observable<AjaxResponse> {
 }
 
 // real API call for sending a single message
-function apiSendMessageReal(message: Message): Observable<AjaxResponse> {
+function apiSendMessageReal(message: Message): Observable<ApiResponse> {
   return ajax({
     url: "./backend/sendmail.py",
     method: "POST",
@@ -46,36 +54,38 @@ function apiSendMessageReal(message: Message): Observable<AjaxResponse> {
     },
     body: message,
     withCredentials: true,
-  });
+  }).pipe(
+    // extract the response object inside the AjaxResponse
+    map((ajaxResponse) => {
+      return ajaxResponse.response as ApiResponse;
+    })
+  );
 }
 
 // fake API call for sending a single message
-function apiSendMessageFake(message: Message): Observable<AjaxResponse> {
-  const ajaxResponse = new AjaxResponse(
-    new Event("Fake API Event"),
-    new XMLHttpRequest(),
-    {} as AjaxRequest
-  );
+function apiSendMessageFake(message: Message): Observable<ApiResponse> {
   const isError = Math.random() < 0.5;
   const delayTime = 2000;
 
-  ajaxResponse.response = {
+  const response = {
     status: isError ? "error" : "success",
     message: isError ? "This is a fake error" : "",
   };
 
-  return of(ajaxResponse).pipe(delay(delayTime));
+  return of(response).pipe(delay(delayTime));
 }
 
 // convert the API response to the appropriate action
-function apiHandleResponse(index: number, ajaxResponse: AjaxResponse) {
-  if (ajaxResponse.response.status === "success") {
+function apiHandleResponse(index: number, response: ApiResponse) {
+  if (response.status === "success") {
+    // message has been sent successfully
     return setStatus({
       index: index,
       status: SendStatus.SUCCESS,
     });
   } else {
-    const error = Error(ajaxResponse.response.message);
+    // server encountered an error while sending the message
+    const error = Error(response.message);
     error.name = "ServerError";
     return setError({
       index: index,
@@ -118,9 +128,9 @@ const sendOneMessageEpic: Epic = (action$, state$) =>
         // select the message where index = action.payload
         // then send the message
         apiSendMessage(selectMessage(action.payload)(state)).pipe(
-          map((ajaxResponse) =>
+          map((response) =>
             // convert the api response into the desired action
-            apiHandleResponse(action.payload, ajaxResponse)
+            apiHandleResponse(action.payload, response)
           ),
           // if there's an ajax error
           catchError((error) =>

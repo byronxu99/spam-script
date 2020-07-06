@@ -34,24 +34,8 @@ export default function MessageSendCard(props: { index: number }) {
     .join(", ");
 
   // icon
-  const icon =
-    status === SendStatus.UNSENT
-      ? faEnvelope
-      : status === SendStatus.QUEUED
-      ? faSpinner
-      : status === SendStatus.SENDING
-      ? faSpinner
-      : status === SendStatus.SUCCESS
-      ? faCheck
-      : faTimes;
-  const iconStyle =
-    status === SendStatus.SUCCESS
-      ? "has-text-success"
-      : status === SendStatus.ERROR
-      ? "has-text-danger"
-      : status === SendStatus.SENDING
-      ? "has-text-info"
-      : "";
+  const icon = getIcon(status);
+  const iconStyle = getIconStyle(status);
   const iconSpin =
     status === SendStatus.QUEUED || status === SendStatus.SENDING;
 
@@ -68,13 +52,18 @@ export default function MessageSendCard(props: { index: number }) {
           {!recipients && (
             <span className="has-text-danger">Message has no recipients!</span>
           )}
-          {/* errors */}
+          {/* error in message */}
           {message.errors && message.errors.length > 0 && (
             <>
               &nbsp;
-              <span className="tag is-warning is-light">
-                Message has errors
-              </span>
+              <span className="tag is-warning is-light">Message error</span>
+            </>
+          )}
+          {/* error in sending process */}
+          {status === SendStatus.ERROR && (
+            <>
+              &nbsp;
+              <span className="tag is-danger is-light">Sending error</span>
             </>
           )}
         </div>
@@ -95,4 +84,32 @@ export default function MessageSendCard(props: { index: number }) {
       )}
     </div>
   );
+}
+
+function getIcon(status: SendStatus) {
+  switch (status) {
+    case SendStatus.UNSENT:
+      return faEnvelope;
+    case SendStatus.QUEUED:
+      return faSpinner;
+    case SendStatus.SENDING:
+      return faSpinner;
+    case SendStatus.SUCCESS:
+      return faCheck;
+    case SendStatus.ERROR:
+      return faTimes;
+  }
+}
+
+function getIconStyle(status: SendStatus) {
+  switch (status) {
+    case SendStatus.SUCCESS:
+      return "has-text-success";
+    case SendStatus.ERROR:
+      return "has-text-danger";
+    case SendStatus.SENDING:
+      return "has-text-info";
+    default:
+      return "";
+  }
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { AppDispatch } from "../../app/store";
+import { AppDispatch } from "../../store";
 import { loadData, selectRawData, selectParsedData } from "./dataSlice";
 import { MessageFormat } from "../../utils/messageTypes";
 import { RESERVED_KEYWORDS } from "../../utils/templating";

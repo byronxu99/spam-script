@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AppThunk, RootState } from "../../app/store";
+import { AppThunk, RootState } from "../../store";
 import { Message } from "../../utils/messageTypes";
 import { selectMessageTemplate } from "../message/messageSlice";
 import { selectParsedData } from "../data/dataSlice";

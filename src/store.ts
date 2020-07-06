@@ -1,10 +1,10 @@
 import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
 import { Epic, createEpicMiddleware, combineEpics } from "redux-observable";
 import { catchError } from "rxjs/operators";
-import dataReducer from "../features/data/dataSlice";
-import templateReducer from "../features/message/messageSlice";
-import sendingReducer from "../features/sending/sendingSlice";
-import { sendingEpic } from "../features/sending/sendingEpic";
+import dataReducer from "./features/data/dataSlice";
+import templateReducer from "./features/message/messageSlice";
+import sendingReducer from "./features/sending/sendingSlice";
+import { sendingEpic } from "./features/sending/sendingEpic";
 
 // list of all redux-observable epics
 const epics: Epic[] = [sendingEpic];
