@@ -29,6 +29,10 @@ These scripts send messages "as-is" without further modification. All of the act
 ### Deployment on scripts.mit.edu
 SSH into Athena and go to your `web_scripts/` directory. Clone this repository, `cd` into it, and run `git checkout gh-pages`.
 
+To update, simply run `git pull` to pull the latest version from Github.
+
+Make sure that the backend scripts are marked as executable, or else the scripts.mit.edu server will return an error when sending emails!
+
 # Development
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app), using the [Redux](https://redux.js.org/) and [Redux Toolkit](https://redux-toolkit.js.org/) template.
 
