@@ -1,14 +1,11 @@
 import { Epic } from "redux-observable";
-import { Observable, of, from, concat } from "rxjs";
-import { ajax } from "rxjs/ajax";
+import { of, from, concat } from "rxjs";
 import {
   map,
   filter,
   withLatestFrom,
   concatMap,
   takeUntil,
-  delay,
-  tap,
   catchError,
 } from "rxjs/operators";
 import {
@@ -21,95 +18,7 @@ import {
   sendMessages,
   cancelSending,
 } from "./sendingSlice";
-import { Message } from "../../utils/messageTypes";
-import { isMIT } from "../../utils/misc";
-
-// response from the message sending API on scripts.mit.edu
-type ApiResponse = {
-  status: string;
-  message?: string;
-  command?: string;
-};
-
-// API call for sending a single message
-function apiSendMessage(message: Message): Observable<ApiResponse> {
-  if (isMIT) {
-    return apiSendMessageReal(message);
-  } else {
-    return apiSendMessageFake(message);
-  }
-}
-
-// real API call for sending a single message
-function apiSendMessageReal(message: Message): Observable<ApiResponse> {
-  return ajax({
-    url: "./backend/sendmail.py",
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: message,
-    withCredentials: true,
-  }).pipe(
-    // extract the response object inside the AjaxResponse
-    map((ajaxResponse) => {
-      if (!ajaxResponse.response.status) {
-        return {
-          status: "error",
-          message: "Did not receive valid response from API",
-        };
-      }
-      return ajaxResponse.response as ApiResponse;
-    })
-  );
-}
-
-// simulated API call for sending a single message
-function apiSendMessageFake(message: Message): Observable<ApiResponse> {
-  const isError = Math.random() < 0.5;
-  const delayTime = 1000;
-  const recipients: string = [message.to, message.cc, message.bcc]
-    .filter((x) => x?.trim())
-    .join(", ");
-
-  return of({
-    status: isError ? "error" : "success",
-    message: isError
-      ? "This is a fake error that occurs with 50% probability"
-      : "",
-  }).pipe(
-    delay(delayTime),
-    tap(() => {
-      if (isError) {
-        console.log(`Fake API: encountered a fake error`);
-      } else {
-        console.log(`Fake API: sent message to ${recipients}`);
-      }
-    })
-  );
-}
-
-// convert the API response to the appropriate action
-function apiHandleResponse(index: number, response: ApiResponse) {
-  if (response.status === "success") {
-    // message has been sent successfully
-    return setStatus({
-      index: index,
-      status: SendStatus.SUCCESS,
-    });
-  } else {
-    // server encountered an error while sending the message
-    return setError({
-      index: index,
-      error: {
-        name: "ServerError",
-        message: response.message
-          ? `${response.status}: ${response.message}`
-          : response.status,
-      } as SendError,
-    });
-  }
-}
+import { apiSendMessage, apiHandleResponse } from "../../utils/api";
 
 /*
 DOCUMENTATION FOR MESSAGE SENDING ACTIONS
@@ -133,6 +42,7 @@ cancelSending action:
 
 export const sendingEpic: Epic = (action$, state$) =>
   action$.pipe(
+    // only listen to actions of type sendMessages
     filter(sendMessages.match),
 
     // loop over each sendMessages action
@@ -145,7 +55,7 @@ export const sendingEpic: Epic = (action$, state$) =>
           .map((status, index) => (status === SendStatus.QUEUED ? index : -1))
           .filter((index) => index !== -1)
       ).pipe(
-        // send the message
+        // loop over each index
         withLatestFrom(state$),
         concatMap(([index, state]) =>
           concat(
