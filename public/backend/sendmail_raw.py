@@ -26,7 +26,7 @@ def main():
     try:
         message = parser.parsebytes(input_bytes)
     except MessageError as e:
-        exit_with_error(str(e))
+        exit_with_error("MessageError: %s" % str(e))
 
     # add a header with the user's email
     message[USER_TRACKING_HEADER] = user_email
@@ -48,5 +48,5 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        exit_with_error(str(e))
+        exit_with_error(repr(e))
     exit_with_success()

@@ -91,13 +91,11 @@ export function apiHandleResponse(index: number, response: ApiResponse) {
     });
   } else {
     // server encountered an error while sending the message
-    const errorMessage = response.message
-      ? `${response.status}: ${response.message}`
-      : response.status;
+    const errorMessage = response.message || response.status;
     return setError({
       index: index,
       error: {
-        name: "ServerError",
+        name: `Server responded with ${response.status}`,
         message: errorMessage,
       } as SendError,
     });
