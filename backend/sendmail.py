@@ -37,7 +37,7 @@ def main():
     except Exception as e:
         # apparently json.JSONDecodeError doesn't exist in python 3.3
         # so we use the generic Exception to catch JSON parsing errors
-        exit_with_error(str(e))
+        exit_with_error("JSON parse error: %s" % str(e))
 
     # create email.message.Message object
     message = make_email_message(request)
@@ -62,5 +62,5 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        exit_with_error(str(e))
+        exit_with_error(repr(e))
     exit_with_success()
