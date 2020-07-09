@@ -13,12 +13,19 @@ import sys
 import json
 import email.utils
 from smtplib import SMTP
+from io import TextIOWrapper
 from common_utils import get_login, exit_with_success, exit_with_error
 from common_utils import SMTP_HOST, USER_TRACKING_HEADER
 from make_email_message import make_email_message
 
 
 def main():
+    # set up stdin/stdout to use utf-8
+    # otherwise, scripts.mit.edu defaults to ascii encoding
+    # which leads to errors when receiving unicode input
+    sys.stdin = TextIOWrapper(sys.stdin.detach(), encoding="utf8")
+    sys.stdout = TextIOWrapper(sys.stdout.detach(), encoding="utf8")
+
     # get user login
     user_email = get_login()
     if not user_email:
@@ -27,7 +34,9 @@ def main():
     # read json input from stdin
     try:
         request = json.load(sys.stdin)
-    except json.JSONDecodeError as e:
+    except Exception as e:
+        # apparently json.JSONDecodeError doesn't exist in python 3.3
+        # so we use the generic Exception to catch JSON parsing errors
         exit_with_error(str(e))
 
     # create email.message.Message object
