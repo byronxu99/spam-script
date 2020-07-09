@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Git on Windows refuses to commit executable permissions for the Python scripts,
+# so we have to manually run "git update-index" to fix it
+git checkout gh-pages
+git pull
+git update-index --chmod=+x backend/sendmail.py
+git update-index --chmod=+x backend/sendmail_raw.py
+git commit -m "add +x permissions"
+git push
+git checkout master
