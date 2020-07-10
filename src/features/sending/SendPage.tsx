@@ -30,14 +30,14 @@ export default function SendPage(props: SendPageProps) {
   const numUnsent = numMessages - numSuccess;
   const numError = sendStatuses.filter((x) => x === SendStatus.ERROR).length;
 
-  // when no messages have been sent, allow going back for further edits
-  const canGoBack = sendStatuses.every((x) => x === SendStatus.UNSENT);
   // done sending when all messages are successfully sent
   const isDoneSending = numSuccess === numMessages;
   // in progress if any message is queued or sending
   const isInProgress = sendStatuses.some(
     (x) => x === SendStatus.QUEUED || x === SendStatus.SENDING
   );
+  // when no messages have been sent, allow going back for further edits
+  const canGoBack = !isInProgress && numSuccess === 0;
 
   // update messages on component mount
   useEffect(() => {
