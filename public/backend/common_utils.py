@@ -9,6 +9,9 @@ SMTP_HOST = "outgoing.mit.edu"
 # Custom email header with user login info
 USER_TRACKING_HEADER = "X-Scripts-SSL-Client-Email"
 
+# Custom email header with scripts.mit.edu server hostname
+SCRIPTS_HOSTNAME_HEADER = "X-Scripts-Hostname"
+
 
 def get_login():
     """
