@@ -10,9 +10,8 @@ import platform
 import email.parser
 import email.utils
 from email.errors import MessageError
-from smtplib import SMTP
-from common_utils import get_login, exit_with_success, exit_with_error
-from common_utils import SMTP_HOST, USER_TRACKING_HEADER, SCRIPTS_HOSTNAME_HEADER
+from common_utils import get_login, exit_with_success, exit_with_error, send_email
+from common_utils import USER_TRACKING_HEADER, SCRIPTS_HOSTNAME_HEADER
 
 
 def main():
@@ -45,8 +44,7 @@ def main():
         print(message.as_string(maxheaderlen=78))
     else:
         # send the email
-        with SMTP(SMTP_HOST) as smtp:
-            smtp.send_message(message)
+        send_email(message)
 
 
 if __name__ == "__main__":

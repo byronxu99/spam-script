@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import smtplib
 
 
 # SMTP server to send outgoing messages
@@ -56,3 +57,31 @@ def exit_with_error(message=""):
 
 def exit_with_success(message=""):
     exit_cgi(message=message, status="success")
+
+
+def send_email(message):
+    """
+    This is the function called to send an email. It takes in an
+    email.message.Message object.
+
+    If authentication information can be found in the file "authentication.py",
+    we use SMTP_SSL and send authenticated messages. Otherwise, we use SMTP
+    and send unauthenticated messages, which outgoing.mit.edu rate-limits to
+    1000 per day: http://kb.mit.edu/confluence/pages/viewpage.action?pageId=155282952
+
+    When this limit is exceeded, you get a strange "Bobo with your canned meat"
+    error message: http://kb.mit.edu/confluence/pages/viewpage.action?pageId=151093401
+    """
+    try:
+        from authentication import SMTP_USERNAME, SMTP_PASSWORD
+    except ImportError:
+        # no authentication.py file
+        # send unauthenticated email
+        with smtplib.SMTP(SMTP_HOST) as smtp:
+            smtp.send_message(message)
+    else:
+        # username/password successfully imported
+        # send authenticated email
+        with smtplib.SMTP_SSL(SMTP_HOST) as smtp:
+            smtp.login(SMTP_USERNAME, SMTP_PASSWORD)
+            smtp.send_message(message)
