@@ -11,11 +11,12 @@ See make_email_message.py for how it's implemented
 
 import sys
 import json
+import platform
 import email.utils
 from smtplib import SMTP
 from io import TextIOWrapper
 from common_utils import get_login, exit_with_success, exit_with_error
-from common_utils import SMTP_HOST, USER_TRACKING_HEADER
+from common_utils import SMTP_HOST, USER_TRACKING_HEADER, SCRIPTS_HOSTNAME_HEADER
 from make_email_message import make_email_message
 
 
@@ -44,6 +45,10 @@ def main():
 
     # add a header with the user's email
     message[USER_TRACKING_HEADER] = user_email
+
+    # add a header with the server hostname
+    # scripts.mit.edu runs multiple machines and load-balances between them
+    message[SCRIPTS_HOSTNAME_HEADER] = platform.node()
 
     # add date if missing
     if "Date" not in message:

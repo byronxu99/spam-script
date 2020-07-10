@@ -6,12 +6,13 @@ and sends it to an outgoing SMTP server.
 """
 
 import sys
+import platform
 import email.parser
 import email.utils
 from email.errors import MessageError
 from smtplib import SMTP
 from common_utils import get_login, exit_with_success, exit_with_error
-from common_utils import SMTP_HOST, USER_TRACKING_HEADER
+from common_utils import SMTP_HOST, USER_TRACKING_HEADER, SCRIPTS_HOSTNAME_HEADER
 
 
 def main():
@@ -30,6 +31,10 @@ def main():
 
     # add a header with the user's email
     message[USER_TRACKING_HEADER] = user_email
+
+    # add a header with the server hostname
+    # scripts.mit.edu runs multiple machines and load-balances between them
+    message[SCRIPTS_HOSTNAME_HEADER] = platform.node()
 
     # add date if missing
     if "Date" not in message:
