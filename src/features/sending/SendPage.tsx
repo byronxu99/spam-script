@@ -36,8 +36,8 @@ export default function SendPage(props: SendPageProps) {
   const isInProgress = sendStatuses.some(
     (x) => x === SendStatus.QUEUED || x === SendStatus.SENDING
   );
-  // when no messages have been sent, allow going back for further edits
-  const canGoBack = !isInProgress && numSuccess === 0;
+  // allow going back for further edits when no or all messages have been sent
+  const canGoBack = !isInProgress && (numSuccess === 0 || isDoneSending);
 
   // update messages on component mount
   useEffect(() => {
