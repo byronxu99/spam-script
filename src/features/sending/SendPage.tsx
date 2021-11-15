@@ -102,6 +102,19 @@ export default function SendPage(props: SendPageProps) {
                 </div>
               )}
 
+              {/* warning for sending more than 250 messages */}
+              {numMessages >= 250 && (
+                <div className="message is-danger">
+                  <div className="message-body">
+                    <strong>You are sending more than 250 emails.</strong> MIT
+                    emails are limited to sending 500 messages per 24 hours
+                    without prior permission from IS&T. Do you really need to
+                    be using the spam script, or can you send this using a
+                    mailing list, the comm panel, or bcc'ing people?
+                  </div>
+                </div>
+              )}
+
               {/* progress stats and send/pause button */}
               <div className="level pb-2">
                 {/* count of messages not yet successfully sent */}
