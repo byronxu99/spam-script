@@ -5,7 +5,7 @@ import smtplib
 
 
 # SMTP server to send outgoing messages
-SMTP_HOST = "outgoing.mit.edu"
+SMTP_HOST = "esp-mail.mit.edu"
 
 # Custom email header with user login info
 USER_TRACKING_HEADER = "X-Scripts-SSL-Client-Email"
