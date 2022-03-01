@@ -1,5 +1,8 @@
 // object representing an email message
 export type Message = {
+  // host
+  host?: string;
+
   // headers
   from?: string;
   sender?: string;

@@ -17,6 +17,9 @@ export const messageSlice = createSlice({
   name: "template",
   initialState,
   reducers: {
+    setHost: (state: Message, action: PayloadAction<string>) => {
+      state.host = action.payload;
+    },
     setMessageFormat: (
       state: Message,
       action: PayloadAction<MessageFormat>
@@ -37,9 +40,18 @@ export const messageSlice = createSlice({
 export default messageSlice.reducer;
 
 // exported actions
-export const { setMessageFormat, setRawBody, setHeader } = messageSlice.actions;
+export const {
+  setHost,
+  setMessageFormat,
+  setRawBody,
+  setHeader,
+} = messageSlice.actions;
 
 // selectors
+export function selectHost(state: RootState) {
+  return state.template.host;
+}
+
 export function selectMessageTemplate(state: RootState) {
   return state.template;
 }

@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import {
   SendStatus,
+  selectMessageHost,
   selectSendStatuses,
   loadMessagesToSend,
   setShowPreview,
@@ -21,6 +22,7 @@ type SendPageProps = {
 export default function SendPage(props: SendPageProps) {
   // data from redux store
   const sendStatuses = useSelector(selectSendStatuses);
+  const messageHost = useSelector(selectMessageHost);
   const dispatch = useDispatch();
 
   // counts of various message types
@@ -102,15 +104,25 @@ export default function SendPage(props: SendPageProps) {
                 </div>
               )}
 
-              {/* warning for sending more than 250 messages */}
-              {numMessages >= 250 && (
+              {/* warning for sending more than 250 messages through outgoing */}
+              {numMessages >= 250 && messageHost !== "esp-mail.mit.edu" && (
                 <div className="message is-danger">
+                  <div className="message-body">
+                    <strong>You are sending more than 250 emails.</strong> MIT
+                    emails are limited to sending 500 messages per 24 hours
+                    without prior permission from IS&T. Do you really need to be
+                    using the spam script, or can you send this using a mailing
+                    list, the comm panel, or bcc'ing people?
+                  </div>
+                </div>
+              )}
+
+              {/* warning for sending more than 250 messages */}
+              {numMessages >= 250 && messageHost === "esp-mail.mit.edu" && (
+                <div className="message is-warning">
                   <div className="message-body">
                     <strong>You are sending more than 250 emails.</strong>
                     Sending to large numbers of people is not well-tested.
-                    Do you really need to be using the spam script, or
-                    can you send this using a mailing list, the comm
-                    panel, or through bcc'ing people?
                   </div>
                 </div>
               )}

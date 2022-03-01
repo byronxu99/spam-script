@@ -5,7 +5,7 @@ import smtplib
 
 
 # SMTP server to send outgoing messages
-SMTP_HOST = "esp-mail.mit.edu"
+SMTP_HOST = "outgoing.mit.edu"
 
 # Custom email header with user login info
 USER_TRACKING_HEADER = "X-Scripts-SSL-Client-Email"
@@ -59,7 +59,7 @@ def exit_with_success(message=""):
     exit_cgi(message=message, status="success")
 
 
-def send_email(message):
+def send_email(message, host=SMTP_HOST):
     """
     This is the function called to send an email. It takes in an
     email.message.Message object.
@@ -73,15 +73,17 @@ def send_email(message):
     error message: http://kb.mit.edu/confluence/pages/viewpage.action?pageId=151093401
     """
     try:
-        from authentication import SMTP_USERNAME, SMTP_PASSWORD
-    except ImportError:
+        from authentication import SMTP_USERNAMES, SMTP_PASSWORDS
+        username = SMTP_USERNAMES[host]
+        password = SMTP_PASSWORDS[host]
+    except:
         # no authentication.py file
         # send unauthenticated email
-        with smtplib.SMTP(SMTP_HOST) as smtp:
+        with smtplib.SMTP(host) as smtp:
             smtp.send_message(message)
     else:
         # username/password successfully imported
         # send authenticated email
-        with smtplib.SMTP_SSL(SMTP_HOST) as smtp:
-            smtp.login(SMTP_USERNAME, SMTP_PASSWORD)
+        with smtplib.SMTP_SSL(host) as smtp:
+            smtp.login(username, password)
             smtp.send_message(message)

@@ -168,6 +168,10 @@ export function loadMessagesToSend(): AppThunk {
 }
 
 // selectors
+export function selectMessageHost(state: RootState) {
+  return state.sending[0]?.message?.host;
+}
+
 export function selectSendStatuses(state: RootState): SendStatus[] {
   return state.sending.map((x) => x.status);
 }

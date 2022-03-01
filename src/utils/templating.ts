@@ -74,6 +74,7 @@ export function makeMessageTemplater(template: Message): MessageTemplater {
 
   return function (spam) {
     const templatedMessage: Message = {
+      host: template.host,
       bodyFormat: template.bodyFormat,
       attachments: template.attachments,
       errors: template.errors || [],

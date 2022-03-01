@@ -3,9 +3,11 @@ import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { MessageFormat } from "../../utils/messageTypes";
 import {
+  selectHost,
   selectMessageFormat,
   setMessageFormat,
   selectRawBody,
+  setHost,
   setRawBody,
   selectHeader,
   setHeader,
@@ -14,6 +16,9 @@ import {
 export default function Form() {
   const [showExtra, setShowExtra] = useState(false);
   const dispatch = useDispatch();
+
+  // host
+  const host = useSelector(selectHost);
 
   // headers
   const from = useSelector(selectHeader("from"));
@@ -105,6 +110,22 @@ export default function Form() {
             >
               Hide additional fields...
             </a>
+          </div>
+
+          <div className="field">
+            <div className="control">
+              <label className="label">Host</label>
+              <input
+                className="input"
+                type="text"
+                value={host || ""}
+                placeholder="outgoing.mit.edu"
+                onChange={(e) => dispatch(setHost(e.target.value))}
+              />
+              <p className="help">
+                Email server to send through.
+              </p>
+            </div>
           </div>
 
           <div className="field">
