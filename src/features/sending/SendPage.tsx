@@ -121,7 +121,7 @@ export default function SendPage(props: SendPageProps) {
               {numMessages >= 250 && messageHost === "esp-mail.mit.edu" && (
                 <div className="message is-warning">
                   <div className="message-body">
-                    <strong>You are sending more than 250 emails.</strong>
+                    <strong>You are sending more than 250 emails.</strong>{" "}
                     Sending to large numbers of people is not well-tested.
                   </div>
                 </div>

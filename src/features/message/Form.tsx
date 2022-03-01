@@ -43,12 +43,12 @@ export default function Form() {
             className="input"
             type="text"
             value={from || ""}
-            placeholder="Your Name <example@esp.mit.edu>"
+            placeholder="Your Name <example@mit.edu>"
             onChange={(e) =>
               dispatch(setHeader({ header: "from", value: e.target.value }))
             }
           />
-          <p className="help">Should be an @esp.mit.edu address</p>
+          <p className="help">Should be an @mit.edu or @esp.mit.edu address</p>
         </div>
       </div>
 
@@ -115,15 +115,18 @@ export default function Form() {
           <div className="field">
             <div className="control">
               <label className="label">Host</label>
-              <input
+              <select
                 className="input"
-                type="text"
                 value={host || ""}
                 placeholder="outgoing.mit.edu"
                 onChange={(e) => dispatch(setHost(e.target.value))}
-              />
+              >
+                <option value="outgoing.mit.edu">outgoing.mit.edu</option>
+                <option value="esp-mail.mit.edu">esp-mail.mit.edu</option>
+              </select>
               <p className="help">
-                Email server to send through.
+                Email server to send through; if esp-mail.mit.edu, From field
+                should be an @esp.mit.edu address
               </p>
             </div>
           </div>
@@ -179,8 +182,9 @@ export default function Form() {
                 }
               />
               <p className="help">
-                If From is not an @esp.mit.edu address, set this to an
-                @esp.mit.edu address to send on behalf of an external address
+                If From is not an @mit.edu / @esp.mit.edu address, set this to
+                an @mit.edu / @esp.mit.edu address to send on behalf of an
+                external address
               </p>
             </div>
           </div>
