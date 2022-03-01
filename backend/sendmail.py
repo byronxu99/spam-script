@@ -57,7 +57,8 @@ def main():
         # print the email without sending
         print(message.as_string(maxheaderlen=78))
     else:
-        send_email(message)
+        host = request.get("host", None)
+        send_email(message, host)
 
 
 if __name__ == "__main__":
