@@ -15,7 +15,7 @@ import platform
 import email.utils
 from io import TextIOWrapper
 from common_utils import get_login, exit_with_success, exit_with_error, send_email
-from common_utils import USER_TRACKING_HEADER, SCRIPTS_HOSTNAME_HEADER
+from common_utils import USER_TRACKING_HEADER, SCRIPTS_HOSTNAME_HEADER, SMTP_HOST
 from make_email_message import make_email_message
 
 
@@ -57,7 +57,7 @@ def main():
         # print the email without sending
         print(message.as_string(maxheaderlen=78))
     else:
-        host = request.get("host", None)
+        host = request.get("host", SMTP_HOST)
         send_email(message, host)
 
 
