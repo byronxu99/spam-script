@@ -147,6 +147,15 @@ export default function HelpTab() {
               </a>
             </td>
           </tr>
+
+          <tr>
+            <td>
+              <code>![Image](filename.jpg)</code>
+            </td>
+            <td>
+              <img alt="" src="https://picsum.photos/100" />
+            </td>
+          </tr>
         </tbody>
       </table>
       <p>
