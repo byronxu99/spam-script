@@ -4,6 +4,7 @@ import {
   Message,
   MessageFormat,
   StandardHeaders,
+  Attachment,
 } from "../../utils/messageTypes";
 
 // what goes into the redux store
@@ -35,6 +36,12 @@ export const messageSlice = createSlice({
     ) => {
       state[action.payload.header] = action.payload.value;
     },
+    setAttachmentNames: (state: Message, action: PayloadAction<string>) => {
+      state.attachmentNames = action.payload;
+    },
+    addAttachments: (state: Message, action: PayloadAction<Attachment[]>) => {
+      state.attachments.push(...action.payload);
+    },
   },
 });
 export default messageSlice.reducer;
@@ -45,6 +52,8 @@ export const {
   setMessageFormat,
   setRawBody,
   setHeader,
+  setAttachmentNames,
+  addAttachments,
 } = messageSlice.actions;
 
 // selectors
@@ -62,6 +71,14 @@ export function selectMessageFormat(state: RootState) {
 
 export function selectRawBody(state: RootState) {
   return state.template.raw;
+}
+
+export function selectAttachmentNames(state: RootState) {
+  return state.template.attachmentNames;
+}
+
+export function selectAttachments(state: RootState) {
+  return state.template.attachments;
 }
 
 export function selectHeader(field: StandardHeaders) {
