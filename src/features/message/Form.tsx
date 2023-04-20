@@ -11,6 +11,8 @@ import {
   setRawBody,
   selectHeader,
   setHeader,
+  selectAttachmentNames,
+  setAttachmentNames,
 } from "./messageSlice";
 
 export default function Form() {
@@ -33,6 +35,9 @@ export default function Form() {
   // message body
   const messageFormat = useSelector(selectMessageFormat);
   const messageText = useSelector(selectRawBody);
+
+  // attachments
+  const attachmentNames = useSelector(selectAttachmentNames);
 
   return (
     <>
@@ -285,6 +290,20 @@ export default function Form() {
           placeholder={placeholderText}
           onChange={(e) => dispatch(setRawBody(e.target.value))}
         ></textarea>
+      </div>
+
+      {/* attachment field */}
+      <div className="field">
+        <div className="control">
+          <label className="label">Attachments</label>
+          <input
+            className="input"
+            type="text"
+            value={attachmentNames || ""}
+            placeholder={`file1.png, file2.png`}
+            onChange={(e) => dispatch(setAttachmentNames(e.target.value))}
+          />
+        </div>
       </div>
     </>
   );

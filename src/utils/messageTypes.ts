@@ -24,6 +24,7 @@ export type Message = {
   html?: string;
 
   // attachments
+  attachmentNames?: string;
   attachments: Attachment[];
 
   // errors

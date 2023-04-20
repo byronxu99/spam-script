@@ -71,12 +71,13 @@ export function makeMessageTemplater(template: Message): MessageTemplater {
     date: makeFieldTemplater(template.date),
   };
   const bodyTemplater = makeFieldTemplater(template.raw);
+  const attachmentNameTemplater = makeFieldTemplater(template.attachmentNames);
 
   return function (spam) {
     const templatedMessage: Message = {
       host: template.host,
       bodyFormat: template.bodyFormat,
-      attachments: template.attachments,
+      attachments: [],
       errors: template.errors || [],
     };
 
@@ -120,9 +121,65 @@ export function makeMessageTemplater(template: Message): MessageTemplater {
       );
     }
 
+    // attempt to add filename attachments
+    template.attachments.forEach((file) => {
+      if (templatedMessage.raw?.includes(file.filename)) {
+        templatedMessage.raw = templatedMessage.raw?.replaceAll(
+          file.filename,
+          `cid:${file.cid}`
+        );
+        templatedMessage.attachments.push({
+          ...file,
+          contentDisposition: "inline",
+        });
+      }
+    });
+
     // copying over custom headers
     if (template.headers) {
       templatedMessage.headers = template.headers;
+    }
+
+    // template attachment names
+    if (typeof attachmentNameTemplater === "function") {
+      try {
+        const result = attachmentNameTemplater(spam);
+        if (result) {
+          templatedMessage.attachmentNames = result;
+        }
+      } catch (e) {
+        // error occured while templating
+        templatedMessage.errors?.push(
+          renameError(e, "Error in attachment names")
+        );
+      }
+    } else {
+      // error occured while creating templater function
+      templatedMessage.errors?.push(
+        renameError(attachmentNameTemplater, "Error in attachment names")
+      );
+    }
+
+    // match attachmentNames to attachments with attachment disposition
+    if (templatedMessage.attachmentNames) {
+      templatedMessage.attachmentNames
+        .split(",")
+        .map((name) => name.trim())
+        .forEach((name) => {
+          const file = template.attachments.find(
+            (file) => file.filename === name
+          );
+          if (!file) {
+            templatedMessage.errors?.push(
+              Error(`Could not find attachment with name ${name}`)
+            );
+          } else {
+            templatedMessage.attachments.push({
+              ...file,
+              contentDisposition: "attachment",
+            });
+          }
+        });
     }
 
     // convert from raw to processed message
@@ -176,6 +233,15 @@ function postprocess(message: Message): Message {
   // missing raw message body
   if (!message.raw) {
     output.text = "";
+  }
+
+  if (output.html) {
+    // pictures we couldn't find attachments for
+    [...output.html.matchAll(/src="(?!cid:)(.*)"/g)].forEach((match) => {
+      output.errors?.push(
+        Error(`Could not find attachment with name ${match[1]}`)
+      );
+    });
   }
 
   output.bodyFormat = MessageFormat.PROCESSED;

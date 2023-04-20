@@ -19,6 +19,21 @@ export default function MessagePreview(props: {
     subjectClass: props.message.subject ? "" : emptyStyle,
   };
 
+  const attachments = props.message.attachments.filter(
+    (file) => file.contentDisposition === "attachment"
+  );
+
+  // change the CIDs to inlined images
+  let html = props.message.html;
+  props.message.attachments.forEach((file) => {
+    if (file.contentDisposition === "inline") {
+      html = html?.replaceAll(
+        `cid:${file.cid}`,
+        `data:${file.contentType};base64,${file.content}`
+      );
+    }
+  });
+
   // array of all errors (empty array if no errors)
   const errors = (props.message.errors || []).concat(
     props.additionalErrors || []
@@ -99,10 +114,10 @@ export default function MessagePreview(props: {
       {/* body */}
       <div className="pt-3 break-overflow">
         {/* HTML body, if it exists */}
-        {props.message.html && (
+        {html && (
           <div
             className="content"
-            dangerouslySetInnerHTML={{ __html: props.message.html }}
+            dangerouslySetInnerHTML={{ __html: html }}
           />
         )}
 
@@ -116,6 +131,17 @@ export default function MessagePreview(props: {
           <p className={emptyStyle}>(message is blank)</p>
         )}
       </div>
+
+      {attachments.length > 0 && (
+        <div className="pt-3 content break-overflow">
+          <b>Attachments:</b>
+          <ul>
+            {attachments.map((file, i) => (
+              <li key={i}>{file.filename}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* errors */}
       {errors.length > 0 && (
