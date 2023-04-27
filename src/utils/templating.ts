@@ -26,6 +26,11 @@ type SpamDataObject = {
 type MessageTemplater = (spam: SpamDataObject) => Message;
 type FieldTemplater = (spam: SpamDataObject) => string;
 
+// escape a regex string
+function escapeRegex(string: string): string {
+  return string.replace(/[/\-\\^$*+?.()|[\]{}]/g, "\\$&");
+}
+
 // convert ParsedData format into a list of SpamDataObject
 // to be used with templating functions
 export function makeSpamObjectArray(data: ParsedData): SpamDataObject[] {
@@ -123,10 +128,30 @@ export function makeMessageTemplater(template: Message): MessageTemplater {
 
     // attempt to add filename attachments
     template.attachments.forEach((file) => {
-      if (templatedMessage.raw?.includes(file.filename)) {
+      const htmlRegex = new RegExp(
+        `(<img[^<>]*)"${escapeRegex(file.filename)}"([^<>]*>)`,
+        "g"
+      );
+      const markdownRegex = new RegExp(
+        `!\\[([^[\\]]*)\\]\\(${escapeRegex(file.filename)}\\)`,
+        "g"
+      );
+
+      if (htmlRegex.test(templatedMessage.raw!)) {
         templatedMessage.raw = templatedMessage.raw?.replaceAll(
-          file.filename,
-          `cid:${file.cid}`
+          htmlRegex,
+          `$1"cid:${file.cid}"$2`
+        );
+        templatedMessage.attachments.push({
+          ...file,
+          contentDisposition: "inline",
+        });
+      }
+
+      if (markdownRegex.test(templatedMessage.raw!)) {
+        templatedMessage.raw = templatedMessage.raw?.replaceAll(
+          markdownRegex,
+          `![$1](cid:${file.cid})`
         );
         templatedMessage.attachments.push({
           ...file,
@@ -237,7 +262,7 @@ function postprocess(message: Message): Message {
 
   if (output.html) {
     // pictures we couldn't find attachments for
-    [...output.html.matchAll(/src="(?!cid:)(.*)"/g)].forEach((match) => {
+    [...output.html.matchAll(/src="(?!cid:)([^"]*)"/g)].forEach((match) => {
       output.errors?.push(
         Error(`Could not find attachment with name ${match[1]}`)
       );
